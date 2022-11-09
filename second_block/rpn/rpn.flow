@@ -1,0 +1,94 @@
+import string;
+import lingo/peg;
+import lingo/pegcode/driver;
+
+lingoGrammarOp : ref Maybe<[PegOp]> = ref None();
+
+lingoGrammar() {
+	onlyOnce(lingoGrammarOp, \ -> {
+		compilePegGrammar("#include rpn.lingo");
+	});
+}
+
+Expr ::= Int, Mul, Add, Sub, Div, Pow, Neg, Var;
+Int : (value : double);
+Mul : (left : Expr, right : Expr);
+Add : (left : Expr, right : Expr);
+Sub : (left : Expr, right : Expr);
+Div : (left : Expr, right : Expr);
+Pow : (left : Expr, right : Expr);
+Neg : (exp: Expr);
+Var : (name : string);
+
+Str(exp: Expr)->string{
+    switch(exp){
+        Add(l, r) : "(" + Str(l) + "+" + Str(r) + ")"
+        Sub(l, r) : "(" + Str(l) + "-" + Str(r) + ")"
+        Mul(l, r) : "(" + Str(l) + "*" + Str(r) + ")"
+        Div(l, r) : "(" + Str(l) + "/" + Str(r) + ")"
+        Pow(l, r) : "(" + Str(l) + "^" + Str(r) + ")"
+        Neg(v)    : "(-"+ Str(v) + ")"
+        Int(num)  : d2s(num)
+        Var(v)    : v
+    }
+}
+
+Val(exp : Expr, vars : Tree<string, double>) -> Maybe<double>{
+    
+    apply_op = \l, r, op -> {
+        switch(Val(l, vars)) {
+            Some(left) :  switch(Val(r, vars)){
+                Some(right) : op(left, right);
+                None() : None();
+            }
+            None() : None();
+        }
+    }
+
+    div = \left, right -> if(right == 0.0) {
+                              None();
+                          } else {
+                              Some(left / right);
+                          };
+
+    switch(exp){
+        Add(l, r) : apply_op(l, r, \left, right -> Some(left + right));
+        Sub(l, r) : apply_op(l, r, \left, right -> Some(left - right));
+        Mul(l, r) : apply_op(l, r, \left, right -> Some(left * right));
+        Div(l, r) : apply_op(l, r, div);
+		Pow(l, r) : apply_op(l, r, \left, right -> dpow2(left, right));
+
+        Neg(e) : switch(Val(e, vars)) {
+            Some(value) : Some(-value);
+            None() : None();
+        }
+
+        Int(num) : Some(num);
+        Var(name) : lookupTree(vars, name);
+    }
+}
+
+getVariables() -> Tree<string, double> {
+	parameters_array = getAllUrlParametersArray();
+    println(parameters_array);
+	fold(parameters_array, makeTree(),\ tree, parameter-> {
+			setTree(tree, parameter[0], s2d(parameter[1]))
+		}
+	);
+}
+
+Parse(s : string) -> Expr {
+    parsic(lingoGrammar(), s, defaultPegActions);
+}
+
+main() {
+    exp = getUrlParameterDef("expr", "6 3 4 + 5 * + 7 -"); // 6 3 4 + 5 * + 7 -
+    revS = reverse(exp);
+    variables = getVariables();                            // - 7 + * 5 + 4 3 6
+    result = Parse(revS);
+
+    println(result);
+    println(Str(result));
+    println(Val(result, variables));
+    quit(0);
+}

@@ -1,0 +1,12 @@
+import runtime;
+import string;
+
+i2scycle (arr:[int])->[string]{
+    map(arr, i2s);
+}
+
+main(){
+    arr = [1, 2, 3];
+    str = i2scycle(arr);
+    println(strGlue(str, ", "));
+}

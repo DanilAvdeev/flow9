@@ -1,0 +1,31 @@
+import runtime;
+
+fibA(n: int)->[int] {
+    if (n == 0) [0] 
+    else if (n == 1) [0, 1]
+    else {
+        prev = fibA(n - 1);
+        concat(prev, [prev[n-2] + prev[n-1]]);
+    }
+}
+
+fibB(n: int, arr: [int])->[int]{
+    if (n <= 1) arr
+    else fibB(n - 1, concat(arr, [arr[length(arr) - 2] + arr[length(arr) - 1]]))
+}
+
+fibC(n: int)->[int]{
+    if(n == 0) [0]
+    else if (n == 1) [0, 1]
+    else {
+        arr: ref[int] = ref fibC(n-1);
+        refArrayPush(arr, ^arr[n-2] + ^arr[n-1]);
+        ^arr;
+    }
+}
+
+main(){
+    println(fibA(11));
+    println(fibB(11, [0, 1]));
+    println(fibC(11));
+}

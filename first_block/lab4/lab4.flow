@@ -1,0 +1,32 @@
+import runtime;
+import ds/tree;
+
+inds(arr : [int], m : int) -> [Pair<int,int>] {
+    foldi(arr, [],\i, acc, value_1 ->
+        foldi(arr, acc,\j, bcc, value_2 ->
+        if (value_1 + value_2 == m) concat(bcc, [Pair(i, j)]) else bcc)
+    );
+}
+
+indsTree(a: [int], m: int) -> [Pair<int, int>]{
+    //строим дерево
+    tree = foldi(a, makeTree(), \i, acc, value-> switch (lookupTree(acc, value)) { //проверяем было ли уже такое значение
+        Some(v): setTree(acc, value, concat(v, [i]));
+        None() : setTree(acc, value, [i]);
+    })
+    // ищем по дереву
+    foldi(a, [], \i, acc, value-> {
+        res = m - value;
+        switch(lookupTree(tree, res)){
+            Some(v): concat(acc, fold(v, [], \bcc, n->{concat(bcc, [Pair(i,n)]);}));
+            None() : acc;
+        }
+    })
+}
+
+main() {
+    a = [1, 2, 3, 4, 1];
+    //map(a, println(inds(a, 0, 3)));
+    println(inds(a, 4));
+    println(indsTree(a, 4));
+}

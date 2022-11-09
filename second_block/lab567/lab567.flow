@@ -1,0 +1,40 @@
+import runtime;
+import lingo/pegcode/driver;
+
+ArExp ::= ArSum, ArMult, ArInt, ArDiff, ArDiv;
+ArSum(l:ArExp, r:ArExp);
+ArMult(l:ArExp, r:ArExp);
+ArDiff(l: ArExp, r:ArExp);
+ArDiv(l: ArExp, r:ArExp);
+ArInt(val:int);
+
+parse(s:string) -> ArExp {
+	parsic(compilePegGrammar("#include arith.lingo"), s, defaultPegActions);
+}
+
+Str(ar:ArExp) -> string {
+	switch(ar) {
+		ArSum(l, r): {"(" + Str(l) + " + " + Str(r) + ")"}; 
+		ArMult(l, r): {"(" + Str(l) + " * " + Str(r) + ")"};
+        ArDiff(l, r): {"(" + Str(l) + " - " + Str(r) + ")"};
+        ArDiv(l, r): {"(" + Str(l) + " / " + Str(r) + ")"};
+		ArInt(val): i2s(val);
+	}
+}
+
+Val(s:ArExp) -> int {
+	switch(s) {
+		ArSum(l, r): Val(l) + Val(r);
+		ArMult(l, r): Val(l) * Val(r);
+        ArDiff(l, r): Val(l) - Val(r);
+        ArDiv(l, r): Val(l) / Val(r);
+		ArInt(val): val;
+	}
+}
+
+main() -> void {
+    println(parse("(1+(4*2))"));
+	println(Str(parse("(1+(4*2))")));
+	println(Val(parse("(1+(4*2))")));
+    quit(0);
+}

@@ -1,0 +1,11 @@
+import runtime;
+
+summary (arr:[int])->int{
+    fold(arr, \y, x -> y+x);
+}
+
+main(){
+    arr = [1, 2, 5];
+    sum = summary(arr);
+    println(sum);
+}

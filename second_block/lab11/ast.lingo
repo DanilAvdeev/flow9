@@ -1,0 +1,12 @@
+exp = int | sub | mul | add | div | var | pow | neg;
+add = "(" ws exp:l ws "+" ws exp:r ws ")" { Add(:l, :r) };
+sub = "(" ws exp:l ws "-" ws exp:r ws ")" { Sub(:l, :r) };
+mul = "(" ws exp:l ws "*" ws exp:r ws ")" { Mul(:l, :r) };
+div = "(" ws exp:l ws "/" ws exp:r ws ")" { Div(:l, :r) };
+pow = "(" ws exp:l ws "^" ws exp:r ws ")" { Pow(:l, :r) };
+neg = "(" ws "-" ws exp:e ws ")" { Neg(:e) };
+
+int = ('0'-'9')+$d {Int(s2d($d))};
+var = ('a'-'z')+$d {Var($d)};
+
+ws = (' ' | '\r' | '\n' | '\t')*;
