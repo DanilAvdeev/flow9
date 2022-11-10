@@ -1,9 +1,9 @@
 expr = mul | add | int | div | sub | pow | neg | var;
 add = ws "+" ws expr:left ws expr:right ws {Add(:left, :right)};
 mul = ws "*" ws expr:left ws expr:right ws {Mul(:left, :right)};
-sub = ws "-" ws expr:left ws expr:right ws {Sub(:left, :right)};
-div = ws "/" ws expr:left ws expr:right ws {Div(:left, :right)};
-pow = ws "^" ws expr:left ws expr:right ws {Pow(:left, :right)};
+sub = ws "-" ws expr:left ws expr:right ws {Sub(:right, :left)};
+div = ws "/" ws expr:left ws expr:right ws {Div(:right, :left)};
+pow = ws "^" ws expr:left ws expr:right ws {Pow(:right, :left)};
 neg = ws "-" ws expr:e ws {Neg(:e)};
 
 int = ('0'-'9')+$d {Int(s2d($d))};
